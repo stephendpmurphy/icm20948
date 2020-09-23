@@ -1,4 +1,5 @@
 # ICM-20948 9-Axis MEMS Motion Tracking Sensor Driver
+![CI](https://github.com/stephendpmurphy/icm20948/workflows/CI/badge.svg) </br>
 C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included directly into a developers source or a static library can be created and then linked against.
 
 
