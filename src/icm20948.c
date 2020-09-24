@@ -33,6 +33,14 @@
 static icm20948_dev_t dev;
 static icm20948_settings_t settings;
 
+static icm20948_return_code_t _spi_read(uint8_t addr, uint8_t *data, uint32_t len) {
+    return dev.intf.read((addr | (0x01 << 7)), data, len);
+}
+
+static icm20948_return_code_t _spi_write(uint8_t addr, uint8_t *data, uint32_t len) {
+    return dev.intf.write(addr, data, len);
+}
+
 icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
 
     icm20948_return_code_t ret = ICM20948_RET_OK;
@@ -55,12 +63,12 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
 
     if( ret == ICM20948_RET_OK ) {
         // Write to the reg bank select to select bank 0
-        ret = dev.intf.write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
     }
 
     if( ret == ICM20948_RET_OK) {
         // If the bank was selected, read the WHO_AM_I register
-        ret = dev.intf.read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
+        ret = _spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
 
         // If we read the register, and the ID doesn't match, return with a general failure
         if( (ret == ICM20948_RET_OK) && (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT) ) {
