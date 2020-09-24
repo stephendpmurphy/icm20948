@@ -29,18 +29,11 @@
 #ifndef _ICM20948_API_H_
 #define _ICM20948_API_H_
 
-
 typedef int8_t(*icm20948_read_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
 typedef int8_t(*icm20948_write_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
 typedef void(*icm20948_delay_us_fptr_t)(uint32_t period);
 
-typedef struct {
-    icm20948_read_fptr_t read;
-    icm20948_write_fptr_t write;
-    icm20948_delay_us_fptr_t delay_us;
-} icm20948_dev_intf_t;
-
-int8_t icm20948_init(icm20948_dev_intf_t *intf);
+int8_t icm20948_intf_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay);
 int8_t icm20948_writeRegs(void);
 
 #endif // _ICM20948_API_H_

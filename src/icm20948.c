@@ -29,30 +29,29 @@
 #include "icm20948.h"
 #include "icm20948_api.h"
 
-static icm20948_usr_bank_t usr_bank;
-static icm20948_dev_intf_t interface;
+static icm20948_dev_t dev;
 
-int8_t icm20948_init(icm20948_dev_intf_t *intf) {
+int8_t icm20948_intf_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
 
     uint8_t reg[5];
     // Store the interface passed in to us. This has pointer references
     // for our read, write, and delay functions.
-    interface.read = intf->read;
-    interface.write = intf->write;
-    interface.delay_us = intf->delay_us;
+    dev.intf.read = r;
+    dev.intf.write = w;
+    dev.intf.delay_us = delay;
 
-    interface.read(0x01, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
-    interface.write(0x01, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
-    interface.delay_us(56);
+    dev.intf.read(0x01, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
+    dev.intf.write(0x01, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
+    dev.intf.delay_us(56);
 
     return 1;
 }
 
 int8_t icm20948_writeRegs(void) {
-    interface.write(0x00, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
-    interface.write(0x01, usr_bank.bank1.arr, sizeof(usr_bank.bank1.arr));
-    interface.write(0x02, usr_bank.bank2.arr, sizeof(usr_bank.bank2.arr));
-    interface.write(0x03, usr_bank.bank3.arr, sizeof(usr_bank.bank3.arr));
+    dev.intf.write(0x00, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
+    dev.intf.write(0x01, dev.usr_bank.bank1.arr, sizeof(dev.usr_bank.bank1.arr));
+    dev.intf.write(0x02, dev.usr_bank.bank2.arr, sizeof(dev.usr_bank.bank2.arr));
+    dev.intf.write(0x03, dev.usr_bank.bank3.arr, sizeof(dev.usr_bank.bank3.arr));
 
     return 1;
 }

@@ -30,6 +30,7 @@
 #define _ICM20948_H_
 
 #include <stdint.h>
+#include "icm20948_api.h"
 
 #define ICM20948_BANK0_REG_COUNT            (65)
 #define ICM20948_BANK1_REG_COUNT            (14)
@@ -621,5 +622,16 @@ typedef struct {
     icm20948_reg_bank_2_t bank2;
     icm20948_reg_bank_3_t bank3;
 } icm20948_usr_bank_t;
+
+typedef struct {
+    icm20948_read_fptr_t read;
+    icm20948_write_fptr_t write;
+    icm20948_delay_us_fptr_t delay_us;
+} icm20948_dev_intf_t;
+
+typedef struct {
+    icm20948_dev_intf_t intf;
+    icm20948_usr_bank_t usr_bank;
+} icm20948_dev_t;
 
 #endif // _ICM20948_H_

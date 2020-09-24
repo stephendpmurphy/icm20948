@@ -50,15 +50,8 @@ void usr_delay_us(uint32_t period) {
 
 int main(void) {
 
-    icm20948_dev_intf_t interface;
-
-    // Store pointers to our read, write, and delay functions
-    interface.write = usr_write;
-    interface.read = usr_read;
-    interface.delay_us = usr_delay_us;
-
-    // Init the icm module and pass in our dev interface struct
-    icm20948_init(&interface);
+    // Init the ICM20948 dev SPI interface
+    icm20948_intf_init(usr_write, usr_read, usr_delay_us);
 
     // Write the regs
     icm20948_writeRegs();
