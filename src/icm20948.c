@@ -29,11 +29,30 @@
 #include "icm20948.h"
 #include "icm20948_api.h"
 
-int icm20948_init(void)
-{
-    icm20948_reg_bank_1_t reg_bank1 = {0};
+static icm20948_usr_bank_t usr_bank;
+static icm20948_dev_intf_t interface;
 
-    reg_bank1.bytes.XA_OFFS_L.bits.XA_OFFS = 0x03;
+int8_t icm20948_init(icm20948_dev_intf_t *intf) {
 
-    return reg_bank1.bytes.XA_OFFS_L.bits.XA_OFFS;
+    uint8_t reg[5];
+    // Store the interface passed in to us. This has pointer references
+    // for our read, write, and delay functions.
+    interface.read = intf->read;
+    interface.write = intf->write;
+    interface.delay_us = intf->delay_us;
+
+    interface.read(0x01, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
+    interface.write(0x01, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
+    interface.delay_us(56);
+
+    return 1;
+}
+
+int8_t icm20948_writeRegs(void) {
+    interface.write(0x00, usr_bank.bank0.arr, sizeof(usr_bank.bank0.arr));
+    interface.write(0x01, usr_bank.bank1.arr, sizeof(usr_bank.bank1.arr));
+    interface.write(0x02, usr_bank.bank2.arr, sizeof(usr_bank.bank2.arr));
+    interface.write(0x03, usr_bank.bank3.arr, sizeof(usr_bank.bank3.arr));
+
+    return 1;
 }

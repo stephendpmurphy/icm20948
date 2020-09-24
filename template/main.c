@@ -22,25 +22,46 @@
     SOFTWARE.
 ****************************************************************************/
 
-/*! @file icm20948_api.h
- * @brief Public header file for the ICM20948 9-Axis MEMS device API.
- */
+#include <stdint.h>
+#include "icm20948_api.h"
 
-#ifndef _ICM20948_API_H_
-#define _ICM20948_API_H_
+int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
 
+    // Assert the CS
 
-typedef int8_t(*icm20948_read_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
-typedef int8_t(*icm20948_write_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
-typedef void(*icm20948_delay_us_fptr_t)(uint32_t period);
+    // Write your data
 
-typedef struct {
-    icm20948_read_fptr_t read;
-    icm20948_write_fptr_t write;
-    icm20948_delay_us_fptr_t delay_us;
-} icm20948_dev_intf_t;
+    // De-assert the CS
+    return 1;
+}
 
-int8_t icm20948_init(icm20948_dev_intf_t *intf);
-int8_t icm20948_writeRegs(void);
+int8_t usr_read(uint8_t addr, uint8_t *data, uint32_t len) {
+    // Assert the CS
 
-#endif // _ICM20948_API_H_
+    // Write your data
+
+    // De-assert the CS
+    return 1;
+}
+
+void usr_delay_us(uint32_t period) {
+    // Delay for the requested period
+}
+
+int main(void) {
+
+    icm20948_dev_intf_t interface;
+
+    // Store pointers to our read, write, and delay functions
+    interface.write = usr_write;
+    interface.read = usr_read;
+    interface.delay_us = usr_delay_us;
+
+    // Init the icm module and pass in our dev interface struct
+    icm20948_init(&interface);
+
+    // Write the regs
+    icm20948_writeRegs();
+
+    return 0;
+}

@@ -273,7 +273,7 @@ typedef union {
         } REG_BANK_SEL;
     } bytes;
     uint8_t arr[ICM20948_BANK0_REG_COUNT];
-} icm20948_reg_bank_0;
+} icm20948_reg_bank_0_t;
 
 typedef union {
     struct {
@@ -614,5 +614,12 @@ typedef union {
     } bytes;
     uint8_t arr[ICM20948_BANK3_REG_COUNT];
 } icm20948_reg_bank_3_t;
+
+typedef struct {
+    icm20948_reg_bank_0_t bank0;
+    icm20948_reg_bank_1_t bank1;
+    icm20948_reg_bank_2_t bank2;
+    icm20948_reg_bank_3_t bank3;
+} icm20948_usr_bank_t;
 
 #endif // _ICM20948_H_
