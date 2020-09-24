@@ -37,13 +37,21 @@
 #define ICM20948_BANK2_REG_COUNT            (20)
 #define ICM20948_BANK3_REG_COUNT            (25)
 
-#define ICM20948_USER_BANK_0                (0)
-#define ICM20948_USER_BNAK_1                (1)
-#define ICM20948_USER_BANK_2                (2)
-#define ICM20948_USER_BANK_3                (3)
-
 #define ICM20948_WHO_AM_I_DEFAULT           (0xEA)
 #define ICM20948_EXT_SLV_SENS_DATA_COUNT    (25)
+
+typedef enum {
+    ICM20948_USER_BANK_0 = 0x00,
+    ICM20948_USER_BANK_1 = 0x01,
+    ICM20948_USER_BANK_2 = 0x02,
+    ICM20948_USER_BANK_3 = 0x03
+} icm20948_reg_bank_sel_t;
+
+typedef enum {
+    ICM20948_ADDR_WHO_AM_I = 0x00,
+    ICM20948_ADDR_REG_BANK_SEL = 0x7F
+} icm20948_reg_bank0_addr_t;
+
 
 typedef union {
     struct {
@@ -621,6 +629,7 @@ typedef struct {
     icm20948_reg_bank_1_t bank1;
     icm20948_reg_bank_2_t bank2;
     icm20948_reg_bank_3_t bank3;
+    icm20948_reg_bank_sel_t reg_bank_sel;
 } icm20948_usr_bank_t;
 
 typedef struct {

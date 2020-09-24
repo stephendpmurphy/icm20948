@@ -26,32 +26,70 @@
  * @brief Source file for the ICM20948 9-Axis MEMS device driver.
  */
 
+#include <string.h>
 #include "icm20948.h"
 #include "icm20948_api.h"
 
 static icm20948_dev_t dev;
+static icm20948_settings_t settings;
 
-int8_t icm20948_intf_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
+icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
 
-    uint8_t reg[5];
-    // Store the interface passed in to us. This has pointer references
-    // for our read, write, and delay functions.
+    icm20948_return_code_t ret = ICM20948_RET_OK;
+
+    // Verify that the function pointers given to us are not invalid
+    if( (r == NULL) || (w == NULL) || (delay == NULL) ) {
+        // One of the functions given to us was a NULL pointer, return with a
+        // NULL PTR return code
+        ret = ICM20948_RET_NULL_PTR;
+    }
+
+    // Store the interface functions passed in to us to be used to
+    // communicate with the IC.
     dev.intf.read = r;
     dev.intf.write = w;
     dev.intf.delay_us = delay;
 
-    dev.intf.read(0x01, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
-    dev.intf.write(0x01, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
-    dev.intf.delay_us(56);
+    // Select user register bank 0
+    dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
 
-    return 1;
+    if( ret == ICM20948_RET_OK ) {
+        // Write to the reg bank select to select bank 0
+        ret = dev.intf.write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+    }
+
+    if( ret == ICM20948_RET_OK) {
+        // If the bank was selected, read the WHO_AM_I register
+        ret = dev.intf.read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
+
+        // If we read the register, and the ID doesn't match, return with a general failure
+        if( (ret == ICM20948_RET_OK) && (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT) ) {
+            // The WHO_AM_I ID was incorrect.
+            ret = ICM20948_RET_GEN_FAIL;
+        }
+        else {
+            // We read the ID and it matched to what we expected. All is good.
+            ret = ICM20948_RET_OK;
+        }
+    }
+
+    // Return our init status
+    return ret;
 }
 
-int8_t icm20948_writeRegs(void) {
-    dev.intf.write(0x00, dev.usr_bank.bank0.arr, sizeof(dev.usr_bank.bank0.arr));
-    dev.intf.write(0x01, dev.usr_bank.bank1.arr, sizeof(dev.usr_bank.bank1.arr));
-    dev.intf.write(0x02, dev.usr_bank.bank2.arr, sizeof(dev.usr_bank.bank2.arr));
-    dev.intf.write(0x03, dev.usr_bank.bank3.arr, sizeof(dev.usr_bank.bank3.arr));
+icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) {
 
-    return 1;
+    // Copy over the new settings
+    memcpy(&settings, newSettings, sizeof(settings));
+
+    // Act upon and apply the new settings
+
+    if( settings.accel_en == ICM20948_ACCEL_ENABLE ) {
+        // Enable the accelerometer
+    }
+    else {
+        // Disable the accelerometer
+    }
+
+    return ICM20948_RET_OK;
 }

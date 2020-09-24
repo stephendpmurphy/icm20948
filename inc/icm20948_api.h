@@ -29,11 +29,56 @@
 #ifndef _ICM20948_API_H_
 #define _ICM20948_API_H_
 
+#include <stdint.h>
+#include <stdbool.h>
+
+#define ICM20948_GYRO_ENABLE    (true)
+#define ICM20948_GYRO_DISABLE   (false)
+
+#define ICM20948_ACCEL_ENABLE   (true)
+#define ICM20948_ACCEL_DISABLE  (false)
+
+#define ICM20948_MAG_ENABLE     (true)
+#define ICM20948_MAG_DISABLE    (false)
+
 typedef int8_t(*icm20948_read_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
 typedef int8_t(*icm20948_write_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
 typedef void(*icm20948_delay_us_fptr_t)(uint32_t period);
 
-int8_t icm20948_intf_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay);
-int8_t icm20948_writeRegs(void);
+typedef enum {
+    ICM20948_RET_OK = 0,
+    ICM20948_RET_GEN_FAIL = -1,
+    ICM20948_RET_INV_PARAM  = -2,
+    ICM20948_RET_NULL_PTR   = -3,
+    ICM20948_RET_INV_CONFIG = -4,
+    ICM20948_RET_TIMEOUT   = -5
+} icm20948_return_code_t;
+
+typedef struct {
+    bool gyro_en;
+    bool accel_en;
+    bool mag_en;
+} icm20948_settings_t;
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+} icm20948_gyro_t;
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+} icm20948_accel_t;
+
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+} icm20948_mag_t;
+
+icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay);
+icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings);
 
 #endif // _ICM20948_API_H_
