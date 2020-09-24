@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Zip up the source
         run: |
-          zip -r --junk-paths source ./
+          zip -r source ./
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
