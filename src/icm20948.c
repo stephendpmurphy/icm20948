@@ -66,7 +66,7 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
         ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
     }
 
-    if( ret == ICM20948_RET_OK) {
+    if( ret == ICM20948_RET_OK ) {
         // If the bank was selected, read the WHO_AM_I register
         ret = _spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
 
@@ -81,23 +81,86 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
         }
     }
 
+    if( ret == ICM20948_RET_OK ) {
+        // Set the clock to best available
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.SLEEP = 0;
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.DEVICE_RESET = 0;
+        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, & dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+    }
+
     // Return our init status
     return ret;
 }
 
 icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Copy over the new settings
     memcpy(&settings, newSettings, sizeof(settings));
 
-    // Act upon and apply the new settings
+    // Apply the new settings
+    if( settings.gyro_en == ICM20948_GYRO_ENABLE ) {
+        // Select Bank 2 if it isn't already
+        if( dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2 )
+        {
+            // Select Bank 0
+            dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
+            // Write to the reg bank select to select bank 2
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        }
 
-    if( settings.accel_en == ICM20948_ACCEL_ENABLE ) {
-        // Enable the accelerometer
-    }
-    else {
-        // Disable the accelerometer
+        if( ret == ICM20948_RET_OK ) {
+            // Set the Gyro Rate
+            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = 0;
+            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FCHOICE = 1;
+            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_DLPFCFG = 5;
+            ret = _spi_write(ICM20948_ADDR_GYRO_CONFIG_1, &dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.byte, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Set the sample rate
+            dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV = 0x0A;
+            ret = _spi_write(ICM20948_ADDR_GYRO_SMPLRT_DIV, &dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV, 0x01);
+        }
+
     }
 
-    return ICM20948_RET_OK;
+    return ret;
+}
+
+icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
+
+    if( dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0 )
+    {
+        // Select Bank 0
+        dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
+        // Write to the reg bank select to select bank 0
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+    }
+
+    if( ret == ICM20948_RET_OK ) {
+        // Read out the 6 bytes of gyro data
+        ret = _spi_read(ICM20948_ADDR_GYRO_XOUT_H, &dev.usr_bank.bank0.bytes.GYRO_XOUT_H, 0x06);
+    }
+
+    if( ret == ICM20948_RET_OK ) {
+        // Arrang the gyro data nicely in the provided struct
+        gyro->x = dev.usr_bank.bank0.bytes.GYRO_XOUT_L | (dev.usr_bank.bank0.bytes.GYRO_XOUT_H << 8);
+        gyro->y = dev.usr_bank.bank0.bytes.GYRO_YOUT_L | (dev.usr_bank.bank0.bytes.GYRO_YOUT_H << 8);
+        gyro->z = dev.usr_bank.bank0.bytes.GYRO_ZOUT_L | (dev.usr_bank.bank0.bytes.GYRO_ZOUT_H << 8);
+
+        gyro->x = gyro->x / 250;
+        gyro->y = gyro->y / 250;
+        gyro->z = gyro->z / 250;
+    }
+    else
+    {
+        gyro->x = 99;
+        gyro->y = 99;
+        gyro->z = 99;
+    }
+
+    return ret;
 }

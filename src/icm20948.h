@@ -40,6 +40,9 @@
 #define ICM20948_WHO_AM_I_DEFAULT           (0xEA)
 #define ICM20948_EXT_SLV_SENS_DATA_COUNT    (25)
 
+#define ICM20948_GYRO_RATE_250              (0x00)
+#define ICM20948_GYRO_LPF_17HZ              (0x29)
+
 typedef enum {
     ICM20948_USER_BANK_0 = 0x00,
     ICM20948_USER_BANK_1 = 0x01,
@@ -47,10 +50,23 @@ typedef enum {
     ICM20948_USER_BANK_3 = 0x03
 } icm20948_reg_bank_sel_t;
 
+#define ICM20948_ADDR_REG_BANK_SEL          (0x7F)
+
 typedef enum {
     ICM20948_ADDR_WHO_AM_I = 0x00,
-    ICM20948_ADDR_REG_BANK_SEL = 0x7F
+    ICM20948_ADDR_PWR_MGMT_1 = 0x06,
+    ICM20948_ADDR_GYRO_XOUT_H = 0x33,
+    ICM20948_ADDR_GYRO_XOUT_L = 0x34,
+    ICM20948_ADDR_GYRO_YOUT_H = 0x35,
+    ICM20948_ADDR_GYRO_YOUT_L = 0x36,
+    ICM20948_ADDR_GYRO_ZOUT_H = 0x37,
+    ICM20948_ADDR_GYRO_ZOUT_L = 0x38,
 } icm20948_reg_bank0_addr_t;
+
+typedef enum {
+    ICM20948_ADDR_GYRO_SMPLRT_DIV = 0x00,
+    ICM20948_ADDR_GYRO_CONFIG_1 = 0x01,
+} icm20948_reg_bank2_addr_t;
 
 
 typedef union {
