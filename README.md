@@ -5,6 +5,8 @@
 </br>
 C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included directly into a developers source or a static library can be created and then linked against.
 
+Development is done on the *dev* branch, and official releases can be found on the *master* branch.
+
 
 ## Retrieving the Source
 The source is located on Github and can be either downloaded and included directly into a developers source directoriy or the developer can add this repo as a submodule into their source (The latter is the preferred method).
