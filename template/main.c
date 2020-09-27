@@ -26,22 +26,31 @@
 #include "icm20948_api.h"
 
 int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Assert the CS
 
-    // Write your data
+    // Write the address
+
+    // Write the data from the provided data buffer
 
     // De-assert the CS
-    return 1;
+
+    return ret;
 }
 
 int8_t usr_read(uint8_t addr, uint8_t *data, uint32_t len) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
+
     // Assert the CS
 
     // Write your data
 
+    // Read out the data, placing the result in the data buffer
+
     // De-assert the CS
-    return 1;
+
+    return ret;
 }
 
 void usr_delay_us(uint32_t period) {
@@ -49,9 +58,29 @@ void usr_delay_us(uint32_t period) {
 }
 
 int main(void) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
+    icm20948_settings_t settings;
+    icm20948_gyro_t gyro_data;
+    icm20948_accel_t accel_data;
 
-    // Init the ICM20948 dev SPI interface
-    icm20948_init(usr_write, usr_read, usr_delay_us);
+    // Init the device function pointers
+    ret = icm20948_init(usr_read, usr_write, usr_delay_us);
+
+    if( ret == ICM20948_RET_OK ) {
+        // Enable the gyro
+        settings.gyro_en = ICM20948_GYRO_ENABLE;
+        // Enable the accelerometer
+        settings.accel_en = ICM20948_ACCEL_ENABLE;
+        // Apply the settings
+        ret = icm20948_applySettings(&settings);
+    }
+
+    while(1) {
+        // Retireve the Gyro data and store it in our gyro_data struct
+        ret |= icm20948_getGyroData(&gyro_data);
+        // Retrieve the Accel data and store it in our accel_data struct
+        ret |= icm20948_getAccelData(&accel_data);
+    }
 
     return 0;
 }

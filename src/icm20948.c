@@ -63,7 +63,7 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
 
     if( ret == ICM20948_RET_OK ) {
         // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
     if( ret == ICM20948_RET_OK ) {
@@ -106,7 +106,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
             // Write to the reg bank select to select bank 2
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
         if( ret == ICM20948_RET_OK ) {
@@ -130,7 +130,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
             // Write to the reg bank select to select bank 0
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
         if( ret == ICM20948_RET_OK ) {
@@ -152,7 +152,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
             // Write to the reg bank select to select bank 2
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
         if( ret == ICM20948_RET_OK ) {
@@ -182,7 +182,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
             // Write to the reg bank select to select bank 0
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
         if( ret == ICM20948_RET_OK ) {
@@ -214,7 +214,7 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
         // Select Bank 0
         dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
         // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
     if( ret == ICM20948_RET_OK ) {
@@ -254,7 +254,7 @@ icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel) {
         // Select Bank 0
         dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
         // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL,  (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
     if( ret == ICM20948_RET_OK ) {
