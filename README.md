@@ -7,9 +7,6 @@ C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included d
 </br></br>
 Development is done on the *dev* branch, and official releases can be found on the *master* branch. Releases will be made on a ~monthly basis assuming no driver breaking bugs are found. Otherwise, a fix will be released to *master* ASAP.
 
-Development is done on the *dev* branch, and official releases can be found on the *master* branch.
-
-
 ## Retrieving the Source
 The source is located on Github and can be either downloaded and included directly into a developers source directoriy or the developer can add this repo as a submodule into their source (The latter is the preferred method).
 
@@ -49,15 +46,14 @@ $ mkdir build && cd build
 $ cmake ..
 $ make
 ```
-</br>
-Example application
-```c
+Example application and main can be found below:
+```C
 #include <stdint.h>
 #include "icm20948_api.h"
 
 int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
-
+    
     // Assert the CS
 
     // Write the address
@@ -65,7 +61,7 @@ int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
     // Write the data from the provided data buffer
 
     // De-assert the CS
-
+    
     return ret;
 }
 
