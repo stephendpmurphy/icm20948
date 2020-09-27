@@ -67,19 +67,20 @@ typedef struct {
 } icm20948_gyro_t;
 
 typedef struct {
-    uint16_t x;
-    uint16_t y;
-    uint16_t z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } icm20948_accel_t;
 
 typedef struct {
-    uint16_t x;
-    uint16_t y;
-    uint16_t z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } icm20948_mag_t;
 
 icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay);
 icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings);
 icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro);
+icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel);
 
 #endif // _ICM20948_API_H_

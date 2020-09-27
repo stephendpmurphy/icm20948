@@ -102,8 +102,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
     // Apply the new settings
     if( settings.gyro_en == ICM20948_GYRO_ENABLE ) {
         // Select Bank 2 if it isn't already
-        if( dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2 )
-        {
+        if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK) ) {
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
             // Write to the reg bank select to select bank 2
@@ -123,8 +122,82 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
             dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV = 0x0A;
             ret = _spi_write(ICM20948_ADDR_GYRO_SMPLRT_DIV, &dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV, 0x01);
         }
-
     }
+    else {
+        // Disable the Gyro
+        // Select Bank 0 if it isn't already
+        if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK) ) {
+            // Select Bank 0
+            dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
+            // Write to the reg bank select to select bank 0
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Read out the current PWR_MGMT Byte
+            ret = _spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Now disable the gyro in the config
+            dev.usr_bank.bank0.bytes.PWR_MGMT_2.bits.DISABLE_GYRO = 0b111;
+            // Write the config back to the device
+            ret = _spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+        }
+    }
+
+    if( settings.accel_en == ICM20948_ACCEL_ENABLE ) {
+        // Select Bank 2 if it isn't already
+        if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK) ) {
+            // Select Bank 0
+            dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
+            // Write to the reg bank select to select bank 2
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Setup the Accel Config
+            dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FS_SEL = 0b01;
+            dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FCHOICE = 1;
+            dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_DLPFCFG = 5;
+            ret = _spi_write(ICM20948_ADDR_ACCEL_CONFIG, &dev.usr_bank.bank2.bytes.ACCEL_CONFIG.byte, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Set the sample rate
+            dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_1.bits.ACCEL_SMPLRT_DIV = 0;
+            ret = _spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_1, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_1.byte, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Set the sample rate
+            dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_2 = 0x0A;
+            ret = _spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_2, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_2, 0x01);
+        }
+    }
+    else {
+        // Disable the Accelerometer
+        // Select Bank 0 if it isn't already
+        if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK) ) {
+            // Select Bank 0
+            dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
+            // Write to the reg bank select to select bank 0
+            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Read out the current PWR_MGMT Byte
+            ret = _spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Now disable the accel in the config
+            dev.usr_bank.bank0.bytes.PWR_MGMT_2.bits.DISABLE_ACCEL = 0b111;
+            // Write the config back to the device
+            ret = _spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+        }
+    }
+
 
     return ret;
 }
@@ -132,8 +205,12 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
 icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
-    if( dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0 )
-    {
+    // Check if the Gyro is enabled
+    if( settings.gyro_en != ICM20948_GYRO_ENABLE ) {
+        ret = ICM20948_RET_INV_CONFIG;
+    }
+
+    if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK) ) {
         // Select Bank 0
         dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
         // Write to the reg bank select to select bank 0
@@ -160,6 +237,49 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
         gyro->x = 99;
         gyro->y = 99;
         gyro->z = 99;
+    }
+
+    return ret;
+}
+
+icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel) {
+    icm20948_return_code_t ret = ICM20948_RET_OK;
+
+    // Check if the Accelerometer is enabled
+    if( settings.accel_en != ICM20948_ACCEL_ENABLE ) {
+        ret = ICM20948_RET_INV_CONFIG;
+    }
+
+    if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK) ) {
+        // Select Bank 0
+        dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
+        // Write to the reg bank select to select bank 0
+        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, &dev.usr_bank.reg_bank_sel, 0x01);
+    }
+
+    if( ret == ICM20948_RET_OK ) {
+        // Read out the 6 bytes of gyro data
+        ret = _spi_read(ICM20948_ADDR_ACCEL_XOUT_H, &dev.usr_bank.bank0.bytes.ACCEL_XOUT_H, 0x06);
+    }
+
+    if( ret == ICM20948_RET_OK ) {
+        // Arrang the gyro data nicely in the provided struct
+        accel->x = dev.usr_bank.bank0.bytes.ACCEL_XOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_XOUT_H << 8);
+        accel->y = dev.usr_bank.bank0.bytes.ACCEL_YOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_YOUT_H << 8);
+        accel->z = dev.usr_bank.bank0.bytes.ACCEL_ZOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_ZOUT_H << 8);
+
+        // This is odd... The FS select for the Accel is set to 4.. I would expect to have to divide
+        // the value down by 4 the.. not 16.. However, this gives us a cool 1000mG on the Z axis.
+        // Modulo divide by 50 to filter out some of the noise.
+        accel->x = (accel->x / 16) - ((accel->x / 16) % 50);
+        accel->y = (accel->y / 16) - ((accel->y / 16) % 50);
+        accel->z = (accel->z / 16) - ((accel->z / 16) % 50);
+    }
+    else
+    {
+        accel->x = 99;
+        accel->y = 99;
+        accel->z = 99;
     }
 
     return ret;
