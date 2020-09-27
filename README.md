@@ -25,6 +25,8 @@ The output library (lib_icm20948.a) can be found in the *lib/* folder. Link agai
 #include "icm20948_api.h"
 ```
 
+// TODO - Add insturctions for compiling with a specific compiler (GNU-ARM, AVR-GCC, etc)
+
 #### Adding to your own source/project
 The other option for integrating the source into your project, is to include everything directly into your project
 * Set your include directories to both the inc/ and src/ folders.
