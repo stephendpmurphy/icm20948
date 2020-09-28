@@ -15,6 +15,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
-        INITIAL_VERSION: '0.0.0'
         RELEASE_BRANCHES: 'master'
-        DEFAULT_BUMP: none
