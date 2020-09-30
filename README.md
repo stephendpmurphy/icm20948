@@ -19,7 +19,13 @@ $ git submodule add https://github.com/stephendpmurphy/icm20948.git
 
 ## Integration
 #### Creating & Linking against a static library
-To create a static library to link against, you must first source your build environment and ensure the **CC** environment variable is set to your desired toolchain. Once your cross-compiler is properly setup. Execute the following commands:
+To create a static library to link against, you must first source your build environment and ensure the **CC** environment variable is set to your desired toolchain. Below is an example of sourcing the **AVR** toolchain before compiling.
+```bash
+$ export CC=/usr/bin/avr-gcc
+$ export CXX=/usr/bin/avr-g++
+```
+
+Once your cross-compiler is properly setup. Execute the following commands:
 ```bash
 $ mkdir build && cd build
 $ cmake ..
@@ -54,7 +60,7 @@ Example application and main can be found below:
 
 int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
-    
+
     // Assert the CS
 
     // Write the address
@@ -62,7 +68,7 @@ int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
     // Write the data from the provided data buffer
 
     // De-assert the CS
-    
+
     return ret;
 }
 
