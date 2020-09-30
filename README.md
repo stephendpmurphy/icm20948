@@ -9,7 +9,7 @@ C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included d
 Development is done on the *dev* branch, and official releases can be found on the *master* branch. Releases will be made on a ~monthly basis assuming no driver breaking bugs are found. Otherwise, a fix will be released to *master* ASAP.
 
 ## Retrieving the Source
-The source is located on Github and can be either downloaded and included directly into a developers source directoriy or the developer can add this repo as a submodule into their source (The latter is the preferred method).
+The source is located on Github and can be either downloaded and included directly into a developers source OR the developer can add this repo as a submodule into their project directory (The latter is the preferred method).
 
 To include the driver as a git submodule
 ```bash
@@ -81,7 +81,7 @@ int8_t usr_read(uint8_t addr, uint8_t *data, uint32_t len) {
 }
 
 void usr_delay_us(uint32_t period) {
-    // Delay for the requested period
+    // uS Delay for the requested period
 }
 
 int main(void) {
@@ -93,6 +93,7 @@ int main(void) {
     // Init the device function pointers
     ret = icm20948_init(usr_read, usr_write, usr_delay_us);
 
+    // Check if we successfully stored the function poiners provided
     if( ret == ICM20948_RET_OK ) {
         // Enable the gyro
         settings.gyro_en = ICM20948_GYRO_ENABLE;
@@ -103,7 +104,7 @@ int main(void) {
     }
 
     while(1) {
-        // Retireve the Gyro data and store it in our gyro_data struct
+        // Retrieve the Gyro data and store it in our gyro_data struct
         ret |= icm20948_getGyroData(&gyro_data);
         // Retrieve the Accel data and store it in our accel_data struct
         ret |= icm20948_getAccelData(&accel_data);
@@ -115,4 +116,4 @@ int main(void) {
 
 ## License
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) </br>
-License has been provided with this source and can be found in the [License.md](./LICENSE.md) file.
+License has been provided with this source and can be found in the [License](./LICENSE) file.
