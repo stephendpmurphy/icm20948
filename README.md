@@ -1,6 +1,7 @@
 # ICM-20948 9-Axis MEMS Motion Tracking Sensor Driver
 [![Release](https://img.shields.io/github/release/stephendpmurphy/icm20948.svg?style=flat-square)](https://github.com/stephendpmurphy/icm20948/releases/latest)
 ![CI](https://github.com/stephendpmurphy/icm20948/workflows/CI/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </br>
 C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included directly into a developers source or a static library can be created and then linked against.
@@ -113,4 +114,5 @@ int main(void) {
 ```
 
 ## License
-MIT License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) </br>
+License has been provided with this source and can be found in the [License.md](./LICENSE.md) file.
