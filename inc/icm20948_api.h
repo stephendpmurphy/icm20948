@@ -41,8 +41,8 @@
 #define ICM20948_MAG_ENABLE     (true)
 #define ICM20948_MAG_DISABLE    (false)
 
-typedef int8_t(*icm20948_read_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
-typedef int8_t(*icm20948_write_fptr_t)(uint8_t addr, uint8_t *data, uint32_t len);
+typedef int8_t(*icm20948_read_fptr_t)(const uint8_t addr, uint8_t *data, const uint32_t len);
+typedef int8_t(*icm20948_write_fptr_t)(const uint8_t addr, const uint8_t *data, const uint32_t len);
 typedef void(*icm20948_delay_us_fptr_t)(uint32_t period);
 
 typedef enum {
