@@ -1,32 +1,16 @@
-name: Release
+name: Version Bump & Release
+
 on:
   push:
     branches:
       - master
+
 jobs:
-  build:
+  release-on-push:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: '0'
-    - name: Bump version and push tag
-      id: bump_version
-      uses: anothrNick/github-tag-action@1.26.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-        RELEASE_BRANCHES: 'master'
-    
-    - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      - uses: rymndhng/release-on-push-action@master
         with:
-          tag_name: ${{ bump_version.outputs.new_tag }}
-          release_name: Release ${{ bump_version.outputs.new_tag }}
-          body: |
-            'new release'
-          draft: false
-          prerelease: false
+          bump_version_scheme: minor
