@@ -3,10 +3,12 @@
 ![CI](https://github.com/stephendpmurphy/icm20948/workflows/CI/badge.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-</br>
-C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included directly into a developers source or a static library can be created and then linked against.
-</br></br>
-Development is done on the *dev* branch, and official releases can be found on the *master* branch. Releases will be made on a ~monthly basis assuming no driver breaking bugs are found. Otherwise, a fix will be released to *master* ASAP.
+C Driver for the IC-20948 9-Axis Telemetry sensor. This driver can be included directly into a developers source or a static library can be created and then linked against. Development is done on the **dev** branch, and official releases can be found on the **master** branch. Releases will be made on a ~monthly basis assuming no driver breaking bugs are found. Otherwise, a fix will be released to **master** ASAP.
+
+## Currently supported features
+The currently supported features are below. The API is written to greatly simplify the implementation of this IC, and thus only a small amount of control is given to the end-user. In the future, settings/config will be added to allow a user to change sample rates, resolution and more for each sensor in this part.
+- Accelerometer
+- Gyroscope +- 4G
 
 ## Retrieving the Source
 The source is located on Github and can be either downloaded and included directly into a developers source OR the developer can add this repo as a submodule into their project directory (The latter is the preferred method).
