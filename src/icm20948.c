@@ -67,17 +67,17 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
     }
 
     if( ret == ICM20948_RET_OK ) {
+        // Ensure the local WHO_AM_I value is zeroed out before reading it from the chip
+        dev.usr_bank.bank0.bytes.WHO_AM_I = 0x00;
+
         // If the bank was selected, read the WHO_AM_I register
         ret = _spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
 
-        // If we read the register, and the ID doesn't match, return with a general failure
-        if( (ret == ICM20948_RET_OK) && (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT) ) {
-            // The WHO_AM_I ID was incorrect.
-            ret = ICM20948_RET_GEN_FAIL;
-        }
-        else {
-            // We read the ID and it matched to what we expected. All is good.
-            ret = ICM20948_RET_OK;
+        if( ret == ICM20948_RET_OK ) {
+            if( dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT ) {
+                // The WHO_AM_I ID was incorrect.
+                ret = ICM20948_RET_GEN_FAIL;
+            }
         }
     }
 
