@@ -78,9 +78,45 @@ typedef struct {
     int16_t z;
 } icm20948_mag_t;
 
+/*!
+ * @brief This API initializes the ICM20948 comms interface, and then does a read from the device
+ * to verify working comms
+ *
+ * @param[in] r: Function pointer to the developers SPI read function
+ * @param[in] w: Function pointer to the developers SPI write function
+ * @param[in] delay: Function pointer to the developers micro-second delay function
+ *
+ * @return Returns the status of initialization
+ */
 icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay);
+
+/*!
+ * @brief This API applys the developers settings for configuring the ICM20948 components
+ *
+ * @param[in] newSettings: Pointer to the new ICM20948 settings to be applied
+ *
+ * @return Returns the status of applying settings
+ */
 icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings);
+
+/*!
+ * @brief This API retrieves the current gyro data from the device
+ *
+ * @param[in] gyro: Pointer to the gyro data struct where the new samples
+ * should be placed
+ *
+ * @return Returns the status of reading gyro data
+ */
 icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro);
+
+/*!
+ * @brief This API retrieves the current accel data from the device
+ *
+ * @param[in] accel: Pointer to the accel data struct where the new samples
+ * should be placed
+ *
+ * @return Returns the status of reading accel data
+ */
 icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel);
 
 #endif // _ICM20948_API_H_

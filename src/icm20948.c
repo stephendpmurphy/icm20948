@@ -30,17 +30,44 @@
 #include "icm20948.h"
 #include "icm20948_api.h"
 
+/*! @brief Structure holding reference to our interface functions
+and the ICM20948 register values */
 static icm20948_dev_t dev;
+
+/*! @brief Current settings applied to the device */
 static icm20948_settings_t settings;
 
+/*!
+ * @brief This API reads data via spi while also setting the Read bit on the address,
+ * using the provided interface function
+ *
+ * @param[in] addr: Reg address to read from
+ * @param[in] data: Pointer to the buffer we want to read data into
+ * @param[in] len: Length of data to be read
+ *
+ * @return Returns the read status
+ */
 static icm20948_return_code_t _spi_read(uint8_t addr, uint8_t *data, uint32_t len) {
     return dev.intf.read((addr | (0x01 << 7)), data, len);
 }
 
+/*!
+ * @brief This API sends data via spi using the provided interface function
+ *
+ * @param[in] addr: Reg address to written from
+ * @param[in] data: Pointer to the buffer we want to write data from
+ * @param[in] len: Length of data to be written
+ *
+ * @return Returns the write status
+ */
 static icm20948_return_code_t _spi_write(uint8_t addr, uint8_t *data, uint32_t len) {
     return dev.intf.write(addr, data, len);
 }
 
+/*!
+ * @brief This API initializes the ICM20948 comms interface, and then does a read from the device
+ * to verify working comms
+ */
 icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
 
     icm20948_return_code_t ret = ICM20948_RET_OK;
@@ -93,6 +120,9 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
     return ret;
 }
 
+/*!
+ * @brief This API applys the developers settings for configuring the ICM20948 components
+ */
 icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
@@ -202,6 +232,9 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
     return ret;
 }
 
+/*!
+ * @brief This API retrieves the current gyro data from the device
+ */
 icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
@@ -242,6 +275,9 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
     return ret;
 }
 
+/*!
+ * @brief This API retrieves the current accel data from the device
+ */
 icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
