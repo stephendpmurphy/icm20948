@@ -103,18 +103,23 @@ int main(void) {
 
     // Check if we successfully stored the function poiners provided
     if( ret == ICM20948_RET_OK ) {
-        // Enable the gyro
-        settings.gyro_en = ICM20948_GYRO_ENABLE;
-        // Enable the accelerometer
-        settings.accel_en = ICM20948_ACCEL_ENABLE;
-        // Apply the settings
+        // Enable the Gyro
+        settings.gyro.en = ICM20948_MOD_ENABLED;
+        // Select the +-20000dps range
+        settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
+        // Enable the Accel
+        settings.accel.en = ICM20948_MOD_ENABLED;
+        // Select the +-2G range
+        settings.accel.fs = ICM20948_ACCEL_FS_SEL_2G;
         ret = icm20948_applySettings(&settings);
     }
 
     while(1) {
         // Retrieve the Gyro data and store it in our gyro_data struct
+        // Output is in dps (Degress per second)
         ret |= icm20948_getGyroData(&gyro_data);
         // Retrieve the Accel data and store it in our accel_data struct
+        // Output is in mG
         ret |= icm20948_getAccelData(&accel_data);
     }
 
