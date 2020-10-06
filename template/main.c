@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include "icm20948_api.h"
 
-int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
+int8_t usr_write(const uint8_t addr, const uint8_t *data, const uint32_t len) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Assert the CS
@@ -39,7 +39,7 @@ int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len) {
     return ret;
 }
 
-int8_t usr_read(uint8_t addr, uint8_t *data, uint32_t len) {
+int8_t usr_read(const uint8_t addr, uint8_t *data, const uint32_t len) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Assert the CS
