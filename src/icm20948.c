@@ -30,17 +30,44 @@
 #include "icm20948.h"
 #include "icm20948_api.h"
 
+/*! @brief Structure holding reference to our interface functions
+and the ICM20948 register values */
 static icm20948_dev_t dev;
+
+/*! @brief Current settings applied to the device */
 static icm20948_settings_t settings;
 
+/*!
+ * @brief This API reads data via spi while also setting the Read bit on the address,
+ * using the provided interface function
+ *
+ * @param[in] addr: Reg address to read from
+ * @param[in] data: Pointer to the buffer we want to read data into
+ * @param[in] len: Length of data to be read
+ *
+ * @return Returns the read status
+ */
 static icm20948_return_code_t _spi_read(uint8_t addr, uint8_t *data, uint32_t len) {
     return dev.intf.read((addr | (0x01 << 7)), data, len);
 }
 
+/*!
+ * @brief This API sends data via spi using the provided interface function
+ *
+ * @param[in] addr: Reg address to written from
+ * @param[in] data: Pointer to the buffer we want to write data from
+ * @param[in] len: Length of data to be written
+ *
+ * @return Returns the write status
+ */
 static icm20948_return_code_t _spi_write(uint8_t addr, uint8_t *data, uint32_t len) {
     return dev.intf.write(addr, data, len);
 }
 
+/*!
+ * @brief This API initializes the ICM20948 comms interface, and then does a read from the device
+ * to verify working comms
+ */
 icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay) {
 
     icm20948_return_code_t ret = ICM20948_RET_OK;
@@ -67,17 +94,17 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
     }
 
     if( ret == ICM20948_RET_OK ) {
+        // Ensure the local WHO_AM_I value is zeroed out before reading it from the chip
+        dev.usr_bank.bank0.bytes.WHO_AM_I = 0x00;
+
         // If the bank was selected, read the WHO_AM_I register
         ret = _spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
 
-        // If we read the register, and the ID doesn't match, return with a general failure
-        if( (ret == ICM20948_RET_OK) && (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT) ) {
-            // The WHO_AM_I ID was incorrect.
-            ret = ICM20948_RET_GEN_FAIL;
-        }
-        else {
-            // We read the ID and it matched to what we expected. All is good.
-            ret = ICM20948_RET_OK;
+        if( ret == ICM20948_RET_OK ) {
+            if( dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT ) {
+                // The WHO_AM_I ID was incorrect.
+                ret = ICM20948_RET_GEN_FAIL;
+            }
         }
     }
 
@@ -93,6 +120,9 @@ icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr
     return ret;
 }
 
+/*!
+ * @brief This API applys the developers settings for configuring the ICM20948 components
+ */
 icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
@@ -100,7 +130,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
     memcpy(&settings, newSettings, sizeof(settings));
 
     // Apply the new settings
-    if( settings.gyro_en == ICM20948_GYRO_ENABLE ) {
+    if( settings.gyro.en == ICM20948_MOD_ENABLED ) {
         // Select Bank 2 if it isn't already
         if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK) ) {
             // Select Bank 0
@@ -111,7 +141,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
 
         if( ret == ICM20948_RET_OK ) {
             // Set the Gyro Rate
-            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = 0;
+            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = settings.gyro.fs;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FCHOICE = 1;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_DLPFCFG = 5;
             ret = _spi_write(ICM20948_ADDR_GYRO_CONFIG_1, &dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.byte, 0x01);
@@ -146,7 +176,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
         }
     }
 
-    if( settings.accel_en == ICM20948_ACCEL_ENABLE ) {
+    if( settings.accel.en == ICM20948_MOD_ENABLED ) {
         // Select Bank 2 if it isn't already
         if( (dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK) ) {
             // Select Bank 0
@@ -157,7 +187,7 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
 
         if( ret == ICM20948_RET_OK ) {
             // Setup the Accel Config
-            dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FS_SEL = 0b01;
+            dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FS_SEL = settings.accel.fs;
             dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FCHOICE = 1;
             dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_DLPFCFG = 5;
             ret = _spi_write(ICM20948_ADDR_ACCEL_CONFIG, &dev.usr_bank.bank2.bytes.ACCEL_CONFIG.byte, 0x01);
@@ -202,11 +232,14 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings) 
     return ret;
 }
 
+/*!
+ * @brief This API retrieves the current gyro data from the device
+ */
 icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Check if the Gyro is enabled
-    if( settings.gyro_en != ICM20948_GYRO_ENABLE ) {
+    if( settings.gyro.en != ICM20948_MOD_ENABLED ) {
         ret = ICM20948_RET_INV_CONFIG;
     }
 
@@ -224,29 +257,72 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro) {
 
     if( ret == ICM20948_RET_OK ) {
         // Arrang the gyro data nicely in the provided struct
-        gyro->x = dev.usr_bank.bank0.bytes.GYRO_XOUT_L | (dev.usr_bank.bank0.bytes.GYRO_XOUT_H << 8);
-        gyro->y = dev.usr_bank.bank0.bytes.GYRO_YOUT_L | (dev.usr_bank.bank0.bytes.GYRO_YOUT_H << 8);
-        gyro->z = dev.usr_bank.bank0.bytes.GYRO_ZOUT_L | (dev.usr_bank.bank0.bytes.GYRO_ZOUT_H << 8);
+        gyro->x = ((int16_t)dev.usr_bank.bank0.bytes.GYRO_XOUT_H << 8) | dev.usr_bank.bank0.bytes.GYRO_XOUT_L;
+        gyro->y = ((int16_t)dev.usr_bank.bank0.bytes.GYRO_YOUT_H << 8) | dev.usr_bank.bank0.bytes.GYRO_YOUT_L;
+        gyro->z = ((int16_t)dev.usr_bank.bank0.bytes.GYRO_ZOUT_H << 8) | dev.usr_bank.bank0.bytes.GYRO_ZOUT_L;
 
-        gyro->x = gyro->x / 250;
-        gyro->y = gyro->y / 250;
-        gyro->z = gyro->z / 250;
+        // Determine the scaling factor based on the Full scale select config
+        // and then scale the values
+        switch( settings.gyro.fs ) {
+            case ICM20948_GYRO_FS_SEL_250DPS:
+                gyro->x /= 131;
+                gyro->y /= 131;
+                gyro->z /= 131;
+                break;
+
+            case ICM20948_GYRO_FS_SEL_500DPS:
+                gyro->x /= 65.5;
+                gyro->y /= 65.5;
+                gyro->z /= 65.5;
+                break;
+
+            case ICM20948_GYRO_FS_SEL_1000DPS:
+                gyro->x /= 32.8;
+                gyro->y /= 32.8;
+                gyro->z /= 32.8;
+                break;
+
+            case ICM20948_GYRO_FS_SEL_2000DPS:
+                gyro->x /= 16.4;
+                gyro->y /= 16.4;
+                gyro->z /= 16.4;
+                break;
+
+            default:
+                // We have an invalid config setting for the resolution
+                gyro->x = 0;
+                gyro->y = 0;
+                gyro->z = 0;
+                ret = ICM20948_RET_INV_CONFIG;
+                break;
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Remove noise by modulo dividing with our configured
+            // resolution
+            gyro->x -= (gyro->x % 10);
+            gyro->y -= (gyro->y % 10);
+            gyro->z -= (gyro->z % 10);
+        }
     }
     else
     {
-        gyro->x = 99;
-        gyro->y = 99;
-        gyro->z = 99;
+        gyro->x = 0;
+        gyro->y = 0;
+        gyro->z = 0;
     }
 
     return ret;
 }
 
+/*!
+ * @brief This API retrieves the current accel data from the device
+ */
 icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel) {
     icm20948_return_code_t ret = ICM20948_RET_OK;
 
     // Check if the Accelerometer is enabled
-    if( settings.accel_en != ICM20948_ACCEL_ENABLE ) {
+    if( settings.accel.en != ICM20948_MOD_ENABLED ) {
         ret = ICM20948_RET_INV_CONFIG;
     }
 
@@ -264,22 +340,59 @@ icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel) {
 
     if( ret == ICM20948_RET_OK ) {
         // Arrang the gyro data nicely in the provided struct
-        accel->x = dev.usr_bank.bank0.bytes.ACCEL_XOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_XOUT_H << 8);
-        accel->y = dev.usr_bank.bank0.bytes.ACCEL_YOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_YOUT_H << 8);
-        accel->z = dev.usr_bank.bank0.bytes.ACCEL_ZOUT_L | (dev.usr_bank.bank0.bytes.ACCEL_ZOUT_H << 8);
+        accel->x = ((int16_t)dev.usr_bank.bank0.bytes.ACCEL_XOUT_H << 8) | dev.usr_bank.bank0.bytes.ACCEL_XOUT_L;
+        accel->y = ((int16_t)dev.usr_bank.bank0.bytes.ACCEL_YOUT_H << 8) | dev.usr_bank.bank0.bytes.ACCEL_YOUT_L;
+        accel->z = ((int16_t)dev.usr_bank.bank0.bytes.ACCEL_ZOUT_H << 8) | dev.usr_bank.bank0.bytes.ACCEL_ZOUT_L;
 
-        // This is odd... The FS select for the Accel is set to 4.. I would expect to have to divide
-        // the value down by 4 the.. not 16.. However, this gives us a cool 1000mG on the Z axis.
-        // Modulo divide by 50 to filter out some of the noise.
-        accel->x = (accel->x / 16) - ((accel->x / 16) % 50);
-        accel->y = (accel->y / 16) - ((accel->y / 16) % 50);
-        accel->z = (accel->z / 16) - ((accel->z / 16) % 50);
+        // Determine the scaling factor based on the Full scale select config
+        // and then scale the values
+        switch( settings.accel.fs ) {
+            case ICM20948_ACCEL_FS_SEL_2G:
+                accel->x /= 16;
+                accel->y /= 16;
+                accel->z /= 16;
+                break;
+
+            case ICM20948_ACCEL_FS_SEL_4G:
+                accel->x /= 8;
+                accel->y /= 8;
+                accel->z /= 8;
+                break;
+
+            case ICM20948_ACCEL_FS_SEL_8G:
+                accel->x /= 4;
+                accel->y /= 4;
+                accel->z /= 4;
+                break;
+
+            case ICM20948_ACCEL_FS_SEL_16G:
+                accel->x /= 2;
+                accel->y /= 2;
+                accel->z /= 2;
+                break;
+
+            default:
+                // We have an invalid config setting for the resolution
+                accel->x = 0;
+                accel->y = 0;
+                accel->z = 0;
+                ret = ICM20948_RET_INV_CONFIG;
+                break;
+        }
+
+        if( ret == ICM20948_RET_OK ) {
+            // Remove noise by modulo dividing with our configured
+            // resolution
+            accel->x -= (accel->x % 50);
+            accel->y -= (accel->y % 50);
+            accel->z -= (accel->z % 50);
+        }
     }
     else
     {
-        accel->x = 99;
-        accel->y = 99;
-        accel->z = 99;
+        accel->x = 0;
+        accel->y = 0;
+        accel->z = 0;
     }
 
     return ret;
