@@ -26,6 +26,10 @@
  * @brief Private header file for the ICM20948 9-Axis MEMS device driver.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _ICM20948_H_
 #define _ICM20948_H_
 
@@ -670,3 +674,7 @@ typedef struct {
 } icm20948_dev_t;
 
 #endif // _ICM20948_H_
+
+#ifdef __cplusplus
+}
+#endif

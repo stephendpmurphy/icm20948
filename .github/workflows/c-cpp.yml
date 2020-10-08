@@ -13,9 +13,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Create build directory
-      run:  mkdir build
-    - name: Configure CMake
+    - name: Create build directories
+      run:  |
+        mkdir build
+        mkdir template/build
+    - name: Configure Lib CMake
       run: cd build && cmake ..
     - name: Build lib
       run: cd build && make
+    - name: Configure Demo CMake
+      run: cd template/build && cmake ..
+    - name: Build Demo
+      run: cd template/build && make
