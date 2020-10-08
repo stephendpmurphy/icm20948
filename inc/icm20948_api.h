@@ -26,6 +26,10 @@
  * @brief Public header file for the ICM20948 9-Axis MEMS device API.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _ICM20948_API_H_
 #define _ICM20948_API_H_
 
@@ -144,3 +148,7 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro);
 icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel);
 
 #endif // _ICM20948_API_H_
+
+#ifdef __cplusplus
+}
+#endif
